@@ -2,17 +2,28 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { DeviceProfile, AdaptiveQuality } from './src/performance.js';
 import { initScroll } from './src/scroll.js';
-import { initWebGL, renderWebGL, updatePixelRatio } from './src/webgl.js';
+import { initWebGL, renderWebGL, updatePixelRatio, switchVideoSource } from './src/webgl.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
 // Core Elements
-const video = document.createElement('video');
-// Dual Profile Asset System: High quality for desktop, High quality portrait for mobile
-video.src = window.innerWidth < 768 ? '/scrub-mobile-hq.mp4' : '/scrub-optimized.mp4';
-video.muted = true;
-video.playsInline = true;
-video.preload = 'auto';
+// 1. Hero Loop Video (Fast Start)
+const heroVideo = document.createElement('video');
+heroVideo.src = window.innerWidth < 768 ? '/hero-mobile.mp4' : '/hero-desktop.mp4';
+heroVideo.muted = true;
+heroVideo.playsInline = true;
+heroVideo.loop = true;
+heroVideo.preload = 'auto';
+
+// 2. Cinematic Scrub Video (Heavy Asset)
+const scrubVideo = document.createElement('video');
+scrubVideo.src = window.innerWidth < 768 ? '/scrub-mobile-hq.mp4' : '/scrub-optimized.mp4';
+scrubVideo.muted = true;
+scrubVideo.playsInline = true;
+scrubVideo.preload = 'auto';
+
+let activeVideo = heroVideo; // Start with the hero loop
+let isScrubVideoReady = false;
 
 const preloader = document.getElementById('preloader');
 const loaderBar = document.getElementById('loader-bar');
@@ -55,6 +66,15 @@ const fallbackInterval = setInterval(() => {
 
 let experienceStarted = false;
 
+heroVideo.load();
+scrubVideo.load();
+
+heroVideo.addEventListener('loadeddata', startExperience);
+scrubVideo.addEventListener('loadeddata', () => { isScrubVideoReady = true; });
+
+// Critical Fix: Force start experience after 1s if hero takes too long
+setTimeout(startExperience, 1000);
+
 function startExperience() {
     if (experienceStarted) return;
     experienceStarted = true;
@@ -63,25 +83,18 @@ function startExperience() {
     clearInterval(fallbackInterval);
     if (loaderBar) loaderBar.style.width = '100%';
     
-    // Evaluate if WebGL should be disabled on extremely weak devices
-    if (DeviceProfile.isMobile && navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) {
-        console.warn("Weak device detected. Falling back to 2D Canvas.");
-        useWebGL = false;
-    }
+    // Kickstart videos for Safari
+    heroVideo.play().catch(() => {});
+    scrubVideo.play().then(() => scrubVideo.pause()).catch(() => {});
 
     if (useWebGL) {
         fallbackCanvas.style.display = 'none';
         try {
-            initWebGL(video, webglCanvas, DeviceProfile);
-            initScroll(); // Init Lenis smooth scrolling
-            
-            // Start rendering immediately so the first frame is ready before preloader fades
+            initWebGL(activeVideo, webglCanvas, DeviceProfile);
+            initScroll();
             requestAnimationFrame(renderLoop);
-            
-            // Decoder Kickstart for Mobile (Safari fix)
-            video.play().then(() => video.pause()).catch(() => {});
         } catch(e) {
-            console.error("WebGL Init Failed. Falling back.", e);
+            console.error("WebGL Init Failed", e);
             useWebGL = false;
             webglCanvas.style.display = 'none';
             fallbackCanvas.style.display = 'block';
@@ -95,21 +108,12 @@ function startExperience() {
     gsap.to(preloader, {
         opacity: 0,
         duration: 0.8,
-        delay: 0.1,
         onComplete: () => {
             preloader.style.visibility = 'hidden';
             initScrollSequence();
         }
     });
 }
-
-video.addEventListener('loadeddata', startExperience);
-
-// Critical Fix: Do not block the user if the network is extremely slow.
-// Force start the experience after 1 second so they can see the LCP image.
-setTimeout(startExperience, 1000);
-
-video.load();
 
 function resizeFallbackCanvas() {
     fallbackCanvas.width = window.innerWidth;
@@ -142,33 +146,36 @@ let firstFrameRendered = false;
 let videoUpdateFrameCount = 0;
 
 function renderLoop() {
-    aqMonitor.tick(); // Monitor FPS
+    aqMonitor.tick();
 
-    if (isVideoLoaded && video.readyState >= 2) {
-        
-        // Decoupled Lerp Logic for Smooth Video Scrubbing
-        const targetTime = scrollState.progress * (video.duration || 15.43);
-        
-        // Slightly faster lerp (0.15) for better responsiveness on mobile
-        currentLerpedTime += (targetTime - currentLerpedTime) * 0.15; 
-        
-        // Mobile Decoder Optimization: Throttle currentTime updates to 30fps (every 2nd frame)
-        // Updating currentTime 60 times a second is too heavy for most mobile decoders.
-        videoUpdateFrameCount++;
-        const throttleFactor = DeviceProfile.isMobile ? 2 : 1;
+    // 1. Switch Strategy: Hero -> Scrub
+    if (scrollState.progress > 0.005 && isScrubVideoReady && activeVideo !== scrubVideo) {
+        activeVideo = scrubVideo;
+        if (useWebGL) {
+            switchVideoSource(activeVideo);
+        }
+    }
 
-        if (videoUpdateFrameCount % throttleFactor === 0) {
-            if (Math.abs(targetTime - currentLerpedTime) > 0.001) {
-                video.currentTime = currentLerpedTime;
+    if (isVideoLoaded) {
+        if (activeVideo === scrubVideo && scrubVideo.readyState >= 2) {
+            const targetTime = scrollState.progress * (scrubVideo.duration || 15.43);
+            currentLerpedTime += (targetTime - currentLerpedTime) * 0.15;
+
+            videoUpdateFrameCount++;
+            const throttleFactor = DeviceProfile.isMobile ? 2 : 1;
+
+            if (videoUpdateFrameCount % throttleFactor === 0) {
+                if (Math.abs(targetTime - currentLerpedTime) > 0.001) {
+                    scrubVideo.currentTime = currentLerpedTime;
+                }
             }
         }
 
         if (useWebGL) {
-            renderWebGL();
+            renderWebGL(activeVideo);
         } else {
-            // 2D Fallback Pipeline
             const canvasRatio = fallbackCanvas.width / fallbackCanvas.height;
-            const videoRatio = video.videoWidth / video.videoHeight;
+            const videoRatio = activeVideo.videoWidth / activeVideo.videoHeight;
             let drawWidth, drawHeight, offsetX, offsetY;
 
             if (canvasRatio > videoRatio) {
@@ -182,12 +189,10 @@ function renderLoop() {
                 offsetX = (fallbackCanvas.width - drawWidth) / 2;
                 offsetY = 0;
             }
-
-            fallbackContext.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
+            fallbackContext.drawImage(activeVideo, offsetX, offsetY, drawWidth, drawHeight);
         }
 
-        // Only hide LCP image once the first frame is actually rendered and video has progressed
-        if (!firstFrameRendered && isVideoLoaded && video.readyState >= 2) {
+        if (!firstFrameRendered && activeVideo.readyState >= 2) {
             firstFrameRendered = true;
             if (lcpImage) {
                 lcpImage.style.opacity = '0';

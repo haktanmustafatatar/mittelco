@@ -87,6 +87,28 @@ function updateTextureCover(canvasRatio, videoRatio) {
     videoTexture.matrix.setUvTransform(0, 0, scaleX, scaleY, 0, 0.5, 0.5);
 }
 
+export function switchVideoSource(newVideoElement) {
+    if (!isInitialized || !newVideoElement) return;
+    
+    // Dispose old texture to free GPU memory
+    if (videoTexture) videoTexture.dispose();
+    
+    // Create new texture for the new video source
+    videoTexture = new THREE.VideoTexture(newVideoElement);
+    videoTexture.minFilter = THREE.LinearFilter;
+    videoTexture.magFilter = THREE.LinearFilter;
+    videoTexture.format = THREE.RGBAFormat;
+    videoTexture.colorSpace = THREE.SRGBColorSpace;
+    
+    material.map = videoTexture;
+    material.needsUpdate = true;
+
+    // Recalculate cover
+    const aspect = window.innerWidth / window.innerHeight;
+    const videoRatio = newVideoElement.videoWidth / newVideoElement.videoHeight;
+    updateTextureCover(aspect, videoRatio);
+}
+
 export function renderWebGL() {
     if (!isInitialized || !renderer || !scene || !camera) return;
     renderer.render(scene, camera);

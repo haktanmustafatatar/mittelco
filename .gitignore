@@ -5,5 +5,7 @@ dist
 *.local
 lighthouse-report.json
 report.json
-scrub-mobile-hq.mp4
-scrub-optimized-fast.mp4
+# Ensure production videos are included
+!public/*.mp4
+!public/*.jpg
+!public/*.png
