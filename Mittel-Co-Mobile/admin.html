@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mittel Co. | Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-dark: #502B11;
+            --color-teak: #B48E69;
+            --color-almond: #F0E0C7;
+            --color-linen: #EAE6DB;
+        }
+        body {
+            font-family: 'Noto Serif', serif;
+            background-color: var(--color-linen);
+            color: var(--color-dark);
+            margin: 0;
+            padding: 40px;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--color-dark);
+            padding-bottom: 20px;
+        }
+        .logo { font-size: 24px; font-weight: bold; }
+        .stats { font-size: 14px; opacity: 0.7; }
+        
+        .submissions-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .submissions-table th, .submissions-table td {
+            padding: 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-linen);
+        }
+        .submissions-table th {
+            background-color: var(--color-dark);
+            color: white;
+            font-weight: normal;
+        }
+        .submissions-table tr:hover { background-color: var(--color-almond); }
+        
+        .no-data { padding: 40px; text-align: center; opacity: 0.5; }
+        .btn-clear {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <div class="logo">MITTEL CO. <span style="font-weight: normal; opacity: 0.5;">ADMIN</span></div>
+        <div class="stats" id="submission-count">0 Başvuru</div>
+        <button class="btn-clear" onclick="clearData()">Verileri Temizle</button>
+    </div>
+
+    <table class="submissions-table">
+        <thead>
+            <tr>
+                <th>Tarih</th>
+                <th>Ad Soyad</th>
+                <th>E-posta</th>
+                <th>Mesaj</th>
+            </tr>
+        </thead>
+        <tbody id="submissions-body">
+            <!-- Data will be loaded here -->
+        </tbody>
+    </table>
+    <div id="no-data-msg" class="no-data" style="display: none;">Henüz başvuru bulunmuyor.</div>
+
+    <script>
+        function loadSubmissions() {
+            const submissions = JSON.parse(localStorage.getItem('mittel_submissions') || '[]');
+            const tbody = document.getElementById('submissions-body');
+            const noData = document.getElementById('no-data-msg');
+            const count = document.getElementById('submission-count');
+            
+            tbody.innerHTML = '';
+            count.innerText = `${submissions.length} Başvuru`;
+            
+            if (submissions.length === 0) {
+                noData.style.display = 'block';
+            } else {
+                noData.style.display = 'none';
+                submissions.reverse().forEach(sub => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="white-space: nowrap; font-size: 12px; opacity: 0.6;">${sub.date}</td>
+                        <td style="font-weight: bold;">${sub.name}</td>
+                        <td>${sub.email}</td>
+                        <td style="font-size: 14px; line-height: 1.4;">${sub.message}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        function clearData() {
+            if(confirm('Tüm verileri silmek istediğinize emin misiniz?')) {
+                localStorage.removeItem('mittel_submissions');
+                loadSubmissions();
+            }
+        }
+
+        loadSubmissions();
+        // Refresh every 5 seconds
+        setInterval(loadSubmissions, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mittel Co</string>
+    <string name="title_activity_main">Mittel Co</string>
+    <string name="package_name">com.mittelco.app</string>
+    <string name="custom_url_scheme">com.mittelco.app</string>
+</resources>

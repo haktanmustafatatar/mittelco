@@ -1,0 +1,9 @@
+node_modules
+dist
+.vercel
+.DS_Store
+*.local
+lighthouse-report.json
+report.json
+scrub-mobile-hq.mp4
+scrub-optimized-fast.mp4

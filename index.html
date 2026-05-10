@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mittel Co. | Lezzetin Tam Ortası</title>
+    <meta name="description" content="Mittel Co. - Butik tatlılar, imza lezzetler ve günlük ritüeller. Fırın ısınıyor, kahve hazır.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="/logo-dark.svg" alt="Mittel Co. Logo" class="header-logo-img">
+        </div>
+    </header>
+
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="loader-content">
+            <img src="/logo-light.svg" alt="Mittel Co." class="loader-logo-img">
+            <div class="loader-bar-container">
+                <div class="loader-bar" id="loader-bar"></div>
+            </div>
+            <p class="loader-text">Lezzet hazırlanıyor...</p>
+        </div>
+    </div>
+
+    <main>
+        <section class="video-scrub-section">
+            <div class="video-container">
+                <img id="lcp-image" src="/lcp-image.jpg" alt="Mittel Co. Background">
+                <canvas id="video-canvas"></canvas>
+                <canvas id="webgl-canvas"></canvas>
+            </div>
+            <div class="scroll-spacer"></div>
+        </section>
+
+        <section class="content-section" id="main-content">
+            <div class="hero-text">
+                <h1 class="reveal-text serif">Alıştıklarınızı unutun.</h1>
+                <p class="accent-text reveal-text">Yeni bir lezzet standartı geliyor</p>
+                <div class="scroll-indicator">
+                    <span class="mouse"></span>
+                </div>
+            </div>
+
+            <!-- Parallax Showcase Sections -->
+            <div class="parallax-showcase">
+                <section class="parallax-item" id="parallax-breakfast">
+                    <div class="parallax-bg" style="background-image: url('/breakfast.png');"></div>
+                    <div class="parallax-overlay">
+                        <div class="parallax-content">
+                            <h2 class="serif">Geleneksel & Modern Kahvaltılar</h2>
+                            <p>Özenle seçilmiş yerel malzemelerle hazırlanan, günün en önemli öğününü bir şölene dönüştüren seçenekler.</p>
+                            <div class="parallax-list">
+                                <span>Serpme Köy Kahvaltısı</span>
+                                <span>Avokadolu Poşe Yumurta</span>
+                                <span>Mittel Kahvaltı Tabağı</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="parallax-item" id="parallax-desserts">
+                    <div class="parallax-bg" style="background-image: url('/desserts.png');"></div>
+                    <div class="parallax-overlay">
+                        <div class="parallax-content">
+                            <h2 class="serif">Boutique Tatlı Deneyimi</h2>
+                            <p>Usta şeflerimizin elinden çıkan, her biri bir sanat eseri titizliğinde hazırlanan imza tatlılar.</p>
+                            <div class="parallax-list">
+                                <span>Karamel Dolgulu San Sebastian</span>
+                                <span>Mittel İmza Brownie</span>
+                                <span>El Yapımı Makaronlar</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="parallax-item" id="parallax-drinks">
+                    <div class="parallax-bg" style="background-image: url('/drinks.png');"></div>
+                    <div class="parallax-overlay">
+                        <div class="parallax-content">
+                            <h2 class="serif">Ustalıkla Hazırlanan İçecekler</h2>
+                            <p>Dünyanın en iyi kahve çekirdeklerinden, ferahlatıcı bitki çaylarına uzanan geniş bir içecek yelpazesi.</p>
+                            <div class="parallax-list">
+                                <span>Nitelikli Üçüncü Nesil Kahveler</span>
+                                <span>Özel Karışım Bitki Çayları</span>
+                                <span>Ev Yapımı Limonata</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Contact Section -->
+            <section class="contact-section">
+                <div class="contact-container">
+                    <div class="contact-form-wrapper">
+                        <h2 class="serif">Bize Ulaşın</h2>
+                        <p class="script-font">Sizi dinlemekten mutluluk duyarız.</p>
+                        <form class="contact-form" id="main-contact-form">
+                            <div class="form-group">
+                                <input type="text" id="form-name" placeholder="Adınız Soyadınız" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" id="form-email" placeholder="E-posta Adresiniz" required>
+                            </div>
+                            <div class="form-group">
+                                <textarea id="form-message" placeholder="Mesajınız" rows="5" required></textarea>
+                            </div>
+                            <button type="submit" class="submit-btn">Gönder</button>
+                            <div id="form-status" style="margin-top: 15px; font-size: 0.9rem;"></div>
+                        </form>
+                    </div>
+                    <div class="contact-info-wrapper">
+                        <div class="info-item">
+                            <h4 class="serif">Adres</h4>
+                            <p>Cihan Group Rezidans, Hüseyin Avni Ulaş, <br>Şht. Polis Murat Ellik Blv. Altı, 25070 Palandöken/Erzurum</p>
+                        </div>
+                        <div class="info-item">
+                            <h4 class="serif">İletişim</h4>
+                            <p>+90 (216) 123 45 67</p>
+                            <p>hello@mittelco.com</p>
+                        </div>
+                        <div class="info-item">
+                            <h4 class="serif">Sosyal Medya</h4>
+                            <div class="social-links">
+                                <a href="#">Instagram</a>
+                                <a href="#">Twitter</a>
+                                <a href="#">Facebook</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="footer">
+                <div class="footer-logo">
+                    <img src="/logo-light.svg" alt="Mittel Co." class="footer-logo-img">
+                </div>
+                <p class="footer-tagline script-font">Signature tastes, daily rituals.</p>
+                <div class="footer-info">
+                    <p>Nisan 2026</p>
+                </div>
+            </footer>
+        </section>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
