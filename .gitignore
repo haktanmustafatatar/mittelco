@@ -9,3 +9,6 @@ report.json
 !public/*.mp4
 !public/*.jpg
 !public/*.png
+_backup_before_new_photos.tar.gz
+*.tar.gz
+
